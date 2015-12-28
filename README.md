@@ -14,7 +14,9 @@ Once configured, this webhook will add a private note to any Intercom conversati
 
 ### Configuration
 
-Set the following environment variables:
+* Set the webhook endpoint to `https://your-app.herokuapp.com/jira_to_intercom`
+
+* Set the following environment variables:
 
 ```
 # ID of your application in Intercom
@@ -29,4 +31,6 @@ INTERCOM_ADMIN_ID
 # hostname for your JIRA instance e.g. companyxyz.atlassian.net
 JIRA_HOSTNAME
 ```
+
+
 
