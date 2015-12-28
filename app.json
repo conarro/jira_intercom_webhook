@@ -10,6 +10,14 @@
   "website": "https://github.com/kconarro14/jira_intercom_webhook",
   "repository": "https://github.com/kconarro14/jira_intercom_webhook",
   "env": {
+    "APP_USERNAME": {
+      "description": "Username used for basic auth",
+      "generator": "secret"
+    },
+    "APP_PASSWORD": {
+      "description": "Password used for basic auth",
+      "generator": "secret"
+    },
     "INTERCOM_APP_ID": {
       "description": "ID of your application in Intercom",
       "value": "intercom_app_id"
