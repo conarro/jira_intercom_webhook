@@ -1,0 +1,38 @@
+{
+  "name": "JIRA Intercom Webhook",
+  "description": "A web service to connect JIRA tickets and Intercom conversations",
+  "keywords": [
+    "jira",
+    "intercom",
+    "atlassian",
+    "webhook"
+  ],
+  "website": "https://github.com/kconarro14/jira_intercom_webhook",
+  "repository": "https://github.com/kconarro14/jira_intercom_webhook",
+  "env": {
+    "APP_USERNAME": {
+      "description": "Username used for basic auth",
+      "generator": "secret"
+    },
+    "APP_PASSWORD": {
+      "description": "Password used for basic auth",
+      "generator": "secret"
+    },
+    "INTERCOM_APP_ID": {
+      "description": "ID of your application in Intercom",
+      "value": "intercom_app_id"
+    },
+    "INTERCOM_API_KEY": {
+      "description": "API key for your Intercom account",
+      "value": "intercom_api_key"
+    },
+    "INTERCOM_ADMIN_ID": {
+      "description": "notes added by the webhook will be attributed to this user in Intercom",
+      "value": "intercom_admin_id"
+    },
+    "JIRA_HOSTNAME": {
+      "description": "hostname for your JIRA instance e.g. companyxyz.atlassian.net",
+      "value": "example.atlassian.net"
+    }
+  }
+}
