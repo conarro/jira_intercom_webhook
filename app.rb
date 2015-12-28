@@ -57,7 +57,10 @@ post '/jira_to_intercom' do
   begin
     data = request.body.read
     json = JSON.parse(data)
-    halt 500 if json.empty?
+    if json.empty?
+      logger.error('JSON payload is empty')
+      halt 500
+    end
   rescue JSON::ParserError => ex
     logger.error('Unable to parse JSON.')
     logger.error(ex)
@@ -76,7 +79,8 @@ post '/jira_to_intercom' do
 
       # get issue info
       issue_title = json['issue']['fields']['summary']
-      issue_url = jira_issue_url(json['issue']['key'])
+      issue_key = json['issue']['key']
+      issue_url = jira_issue_url(issue_key)
 
       # get convo
       convo_response = INTERCOM_CLIENT.get_conversation(convo_id)
@@ -86,15 +90,20 @@ post '/jira_to_intercom' do
         issue_regex = jira_issue_regex(issue_key)
         convo_bodies = convo_response['conversation_parts']['conversation_parts'].map {|p| p['body'] }.compact.join
         # already linked, quit here
-        halt 409 if issue_regex.match(convo_bodies)
+        if issue_regex.match(convo_bodies)
+          logger.info("Issue #{issue_key} already linked in Intercom")
+          halt 409
+        end
       end
 
       # not linked, let's add a link
+      logger.info("Linking issue #{issue_key} in Intercom...")
       result = INTERCOM_CLIENT.note_conversation(convo_id, "JIRA ticket: <a href='#{issue_url}' target='_blank'>#{issue_title}</a>")
 
       result.to_json
     end
   else
+    logger.info("Unsupported JIRA webhook event")
     halt 400
   end
 end
