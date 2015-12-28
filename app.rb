@@ -98,7 +98,7 @@ post '/jira_to_intercom' do
 
       # not linked, let's add a link
       logger.info("Linking issue #{issue_key} in Intercom...")
-      result = INTERCOM_CLIENT.note_conversation(convo_id, "JIRA ticket: <a href='#{issue_url}' target='_blank'>#{issue_title}</a>")
+      result = INTERCOM_CLIENT.note_conversation(convo_id, "JIRA ticket: <a href='#{issue_url}' target='_blank'>#{issue_title} (#{issue_key})</a>")
 
       result.to_json
     end
