@@ -3,7 +3,7 @@ Bundler.require
 require 'logger'
 require './intercom_api_client.rb'
 
-INTERCOM_REGEX = /https:\/\/app.intercom.io\/a\/apps\/(?<app_id>\S*)\/inbox\/conversation\/(?<conversation_id>\d*)/
+INTERCOM_REGEX = /https:\/\/app.intercom.io\/a\/apps\/(?<app_id>\S*)\/inbox\/(\S*\/)?conversation(s)?\/(?<conversation_id>\d*)/
 INTERCOM_CLIENT = IntercomApiClient.new(ENV['INTERCOM_APP_ID'], ENV['INTERCOM_API_KEY'])
 JIRA_HOSTNAME = ENV['JIRA_HOSTNAME']
 
