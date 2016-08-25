@@ -37,7 +37,7 @@ class IntercomApiClient
         message_type: 'note'
       }.to_json
     })
-    #self.class.post("/conversations/#{id}/reply", params)
+    self.class.post("/conversations/#{id}/reply", params)
   end
 
 end
