@@ -1,7 +1,7 @@
 require 'bundler'
 Bundler.require
 require 'logger'
-require './intercom_api_client.rb'
+Dir[File.dirname(__FILE__) + '/lib/*.rb'].each {|file| require file; puts "required #{file}" }
 
 INTERCOM_REGEX = /https:\/\/app.intercom.io\/a\/apps\/(?<app_id>\S*)\/inbox\/(\S*\/)?conversation(s)?\/(?<conversation_id>\d*)/
 INTERCOM_CLIENT = IntercomApiClient.new(ENV['INTERCOM_APP_ID'], ENV['INTERCOM_API_KEY'])
@@ -69,41 +69,59 @@ post '/jira_to_intercom' do
     logger.debug(data)
   end
 
-  if ['jira:issue_created', 'jira:issue_updated'].include?(json['webhookEvent'])
-    description = json['issue']['fields']['description']
-    match_data = INTERCOM_REGEX.match(description)
+  jira_event = JiraEvent.new(json)
 
-    # check if description includes intercom conversation URL
-    if match_data && match_data[:app_id] && match_data[:conversation_id]
-      convo_id = match_data[:conversation_id]
+  if jira_event.supported?
+    link_finder = IntercomLinkFinder.new(jira_event.content)
+
+    # check if jira event content includes intercom conversation URL
+    if link_finder.has_link?
 
       # get issue info
-      issue_title = json['issue']['fields']['summary']
-      issue_key = json['issue']['key']
-      issue_url = jira_issue_url(issue_key)
+      issue_title = jira_event.issue_title
+      issue_key   = jira_event.issue_key
+      issue_url   = jira_event.issue_url
 
       # get convo
-      convo_response = INTERCOM_CLIENT.get_conversation(convo_id)
+      # TODO: move this into background job
+      conversation = INTERCOM_CLIENT.get_conversation(link_finder.conversation_id)
 
       # check if convo already linked
-      if convo_response.code == 200
-        issue_regex = jira_issue_regex(issue_key)
-        convo_bodies = convo_response['conversation_parts']['conversation_parts'].map {|p| p['body'] }.compact.join
-        # already linked, quit here
-        if issue_regex.match(convo_bodies)
-          logger.info("Issue #{issue_key} already linked in Intercom")
-          halt 409
+      if conversation.code == 200
+
+        # issue and convo already linked
+        if jira_event.issue_referenced?(conversation.body)
+
+          if jira_event.comment_related?
+            logger.debug "Comment event"
+            # add jira comment as note in intercom
+            @result = INTERCOM_CLIENT.note_conversation(
+              link_finder.conversation_id,
+              "#{jira_event.user} commented on #{jira_event.link_to_issue}: #{jira_event.content}"
+            )
+          else
+            # nothing to do here
+            logger.info("Issue #{issue_key} already linked in Intercom")
+            halt 409
+          end
         end
+
+      else
+        # not linked, let's add a link
+        logger.info("Linking issue #{issue_key} in Intercom...")
+        @result = INTERCOM_CLIENT.note_conversation(
+          link_finder.conversation_id,
+          "#{jira_event.user} linked a JIRA ticket: #{jira_event.link_to_issue}"
+        )
       end
 
-      # not linked, let's add a link
-      logger.info("Linking issue #{issue_key} in Intercom...")
-      result = INTERCOM_CLIENT.note_conversation(convo_id, "JIRA ticket: <a href='#{issue_url}' target='_blank'>#{issue_title} (#{issue_key})</a>")
-
-      result.to_json
+      @result.to_json
+    else
+      # no link, nothing to see here
+      { :message => 'No Intercom link in the JIRA event' }.to_json
     end
   else
-    logger.info("Unsupported JIRA webhook event")
+    logger.info("Unsupported JIRA webhook event #{jira_event.name}")
     halt 400
   end
 end

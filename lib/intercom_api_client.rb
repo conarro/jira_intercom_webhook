@@ -21,7 +21,8 @@ class IntercomApiClient
 
   def get_conversation id, params={}
     params.merge!(default_params)
-    self.class.get("/conversations/#{id}", params)
+    response = self.class.get("/conversations/#{id}", params)
+    IntercomConversation.new(response)
   end
 
   # add a private note to the conversation
@@ -36,7 +37,7 @@ class IntercomApiClient
         message_type: 'note'
       }.to_json
     })
-    self.class.post("/conversations/#{id}/reply", params)
+    #self.class.post("/conversations/#{id}/reply", params)
   end
 
 end
