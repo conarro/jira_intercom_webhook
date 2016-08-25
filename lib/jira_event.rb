@@ -1,45 +1,34 @@
+require_relative './jira_event/issue'
+require_relative './jira_event/comment'
+
 class JiraEvent
   SUPPORTED_ISSUE_EVENTS   = ['jira:issue_created', 'jira:issue_updated']
   JIRA_HOSTNAME            = ENV['JIRA_HOSTNAME']
 
-  attr_reader :name, :payload, :type, :user
+  attr_reader :name, :payload, :type, :issue, :comment
 
   def initialize payload
     @payload  = payload
     @name     = payload['webhookEvent']
     @type     = payload['issue_event_type_name']
-    @user     = payload['user']['displayName']
-  end
 
-  def link_to_issue
-    "<a href='#{issue_url}' target='_blank'>#{issue_title} (#{issue_key})</a>"
+    @issue    = Issue.new(payload['issue'])
+    @comment  = Comment.new(payload['comment'], issue)
   end
 
   def content
-    @content ||= if issue_related?
-      payload['issue']['fields']['description']
-    elsif comment_related?
-      payload['comment']['body']
-    end
+    @content ||= [issue.description, comment.body].join
   end
 
-  def issue_title
-    @issue_title ||= payload['issue']['fields']['summary']
+  def issue_created?
+    name == 'jira:issue_created'
   end
 
-  def issue_key
-    @issue_key ||= payload['issue']['key']
+  def issue_updated?
+    name == 'jira:issue_updated'
   end
 
-  def issue_url
-    @issue_url ||= %(https://#{JIRA_HOSTNAME}/browse/#{issue_key})
-  end
-
-  def issue_related?
-    type.nil?
-  end
-
-  def comment_related?
+  def issue_commented?
     type && type == 'issue_commented'
   end
 
@@ -54,6 +43,6 @@ class JiraEvent
   private
 
   def issue_regex
-    @issue_regex ||= /https:\/\/#{JIRA_HOSTNAME}\/browse\/#{key}/
+    @issue_regex ||= /https:\/\/#{JIRA_HOSTNAME}\/browse\/#{issue.key}/
   end
 end

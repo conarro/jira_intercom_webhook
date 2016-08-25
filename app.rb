@@ -31,19 +31,6 @@ use Rack::Auth::Basic, "Restricted Area" do |username, password|
   username == ENV['APP_USERNAME'] and password == ENV['APP_PASSWORD']
 end
 
-#################
-# helper methods
-#
-def jira_issue_url key
-  %(https://#{JIRA_HOSTNAME}/browse/#{key})
-end
-
-def jira_issue_regex key
-  /https:\/\/#{JIRA_HOSTNAME}\/browse\/#{key}/
-end
-#
-#################
-
 get '/health' do
   content_type :json
   {status: 'OK'}.to_json
@@ -76,11 +63,8 @@ post '/jira_to_intercom' do
 
     # check if jira event content includes intercom conversation URL
     if link_finder.has_link?
-
       # get issue info
-      issue_title = jira_event.issue_title
-      issue_key   = jira_event.issue_key
-      issue_url   = jira_event.issue_url
+      issue = jira_event.issue
 
       # get convo
       # TODO: move this into background job
@@ -92,26 +76,29 @@ post '/jira_to_intercom' do
         # issue and convo already linked
         if jira_event.issue_referenced?(conversation.body)
 
-          if jira_event.comment_related?
-            logger.debug "Comment event"
+          if jira_event.issue_commented?
+            comment = jira_event.comment
+
+            logger.debug("Comment event")
+            logger.info("Adding note for comment on issue #{issue.key} in Intercom...")
             # add jira comment as note in intercom
             @result = INTERCOM_CLIENT.note_conversation(
               link_finder.conversation_id,
-              "#{jira_event.user} commented on #{jira_event.link_to_issue}: #{jira_event.content}"
+              "#{comment.author} commented on #{issue.hyperlink}: #{comment.body}"
             )
           else
             # nothing to do here
-            logger.info("Issue #{issue_key} already linked in Intercom")
+            logger.info("Issue #{issue.key} already linked in Intercom")
             halt 409
           end
         end
 
       else
         # not linked, let's add a link
-        logger.info("Linking issue #{issue_key} in Intercom...")
+        logger.info("Linking issue #{issue.key} in Intercom...")
         @result = INTERCOM_CLIENT.note_conversation(
           link_finder.conversation_id,
-          "#{jira_event.user} linked a JIRA ticket: #{jira_event.link_to_issue}"
+          "#{issue.reporter} linked a JIRA ticket: #{issue.hyperlink}"
         )
       end
 
