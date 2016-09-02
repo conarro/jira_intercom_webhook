@@ -39,6 +39,10 @@ post '/jira_to_intercom' do
 
     # check if jira event content includes intercom conversation URL
     if link_finder.has_link?
+      puts 'JIRA event includes Intercom URL'
+
+      @result = {} # placeholder
+
       # get issue info
       issue = jira_event.issue
 
@@ -51,6 +55,7 @@ post '/jira_to_intercom' do
 
         # issue and convo already linked
         if jira_event.issue_referenced?(conversation.body)
+          puts 'Issue and Conversation already linked'
 
           if jira_event.issue_commented?
             comment = jira_event.comment
