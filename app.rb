@@ -50,6 +50,8 @@ post '/jira_to_intercom' do
       # TODO: move this into background job
       conversation = INTERCOM_CLIENT.get_conversation(link_finder.conversation_id)
 
+      puts "Conversation status code: #{conversation.code}"
+
       # check if convo already linked
       if conversation.code == 200
 
@@ -71,15 +73,17 @@ post '/jira_to_intercom' do
             puts "Issue #{issue.key} already linked in Intercom"
             halt 409
           end
+        else
+          # not linked, let's add a link
+          puts "Linking issue #{issue.key} in Intercom..."
+          @result = INTERCOM_CLIENT.note_conversation(
+            link_finder.conversation_id,
+            "#{issue.reporter} linked a JIRA ticket: #{issue.hyperlink}"
+          )
         end
-
       else
-        # not linked, let's add a link
-        puts "Linking issue #{issue.key} in Intercom..."
-        @result = INTERCOM_CLIENT.note_conversation(
-          link_finder.conversation_id,
-          "#{issue.reporter} linked a JIRA ticket: #{issue.hyperlink}"
-        )
+        puts "Intercom API call failed", conversation.inspect
+        halt 500
       end
 
       @result.to_json
