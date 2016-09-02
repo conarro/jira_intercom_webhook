@@ -8,14 +8,18 @@ class JiraEvent
     end
 
     def author
-      @author ||= payload['author']['displayName'] rescue nil
+      @author ||= payload['author']['displayName'] if has_payload? && payload['author']
     end
 
     def body
-      @body ||= payload['body']
+      @body ||= payload['body'] if has_payload?
     end
 
     private
+
+    def has_payload?
+      payload.present?
+    end
 
     attr_reader :payload
 
