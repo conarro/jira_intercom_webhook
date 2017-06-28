@@ -20,7 +20,7 @@ This app works by:
 
 ### Configuration
 
-* Set the webhook endpoint to `https://your-app.herokuapp.com/jira_to_intercom`
+#### When creating the Heroku app:
 
 * Set the following environment variables:
 
@@ -38,5 +38,19 @@ INTERCOM_ADMIN_ID
 JIRA_HOSTNAME
 ```
 
+* And the following environment variables will be set automatically to random strings of characters:
 
+```
+# username used for HTTP Basic Auth
+APP_USERNAME
+
+# password used for HTTP Basic Auth
+APP_PASSWORD
+```
+
+#### After creating Heroku app
+* Copy the auto-generated values for APP_USERNAME and APP_PASSWORD from within the Heroku app's settings (under 'Config Vars')
+  https://devcenter.heroku.com/articles/config-vars#setting-up-config-vars-for-a-deployed-application
+
+* In JIRA, set the webhook endpoint to `https://YOUR_APP_USERNAME:YOUR_APP_PASSWORD@your-app.herokuapp.com/jira_to_intercom`, where YOUR_APP_USERNAME is the value of the `APP_USERNAME` var, and YOUR_APP_PASSWORD is the value of the `APP_PASSWORD` var
 
