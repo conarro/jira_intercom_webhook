@@ -6,15 +6,13 @@ class IntercomApiClient
 
   attr_reader :default_params
 
-  def initialize(username, password)
+  def initialize(username, token)
+    auth = "Bearer " + token
     @default_params = {
-      :basic_auth => {
-        :username => username,
-        :password => password
-      },
       :headers => {
         'Accept'       => 'application/json',
-        'Content-Type' => 'application/json'
+        'Content-Type' => 'application/json',
+        "Authorization" => auth
       }
     }
   end
