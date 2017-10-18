@@ -6,7 +6,7 @@ class IntercomApiClient
 
   attr_reader :default_params
 
-  def initialize(username, token)
+  def initialize(token)
     auth = "Bearer " + token
     @default_params = {
       :headers => {

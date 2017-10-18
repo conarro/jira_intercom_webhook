@@ -3,7 +3,7 @@ Bundler.require
 Dir[File.dirname(__FILE__) + '/lib/*.rb'].each {|file| require file }
 
 INTERCOM_REGEX = /https:\/\/app.intercom.io\/a\/apps\/(?<app_id>\S*)\/inbox\/(\S*\/)?conversation(s)?\/(?<conversation_id>\d*)/
-INTERCOM_CLIENT = IntercomApiClient.new(ENV['INTERCOM_APP_ID'], ENV['INTERCOM_API_KEY'])
+INTERCOM_CLIENT = IntercomApiClient.new(ENV['INTERCOM_API_KEY'])
 JIRA_HOSTNAME = ENV['JIRA_HOSTNAME']
 
 use Rack::Auth::Basic, "Restricted Area" do |username, password|
