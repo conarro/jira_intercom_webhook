@@ -25,9 +25,6 @@ This app works by:
 * Set the following environment variables:
 
 ```
-# ID of your application in Intercom
-INTERCOM_APP_ID
-
 # API key for your Intercom account
 INTERCOM_API_KEY
 
@@ -53,4 +50,3 @@ APP_PASSWORD
   https://devcenter.heroku.com/articles/config-vars#setting-up-config-vars-for-a-deployed-application
 
 * In JIRA, set the webhook endpoint to `https://YOUR_APP_USERNAME:YOUR_APP_PASSWORD@your-app.herokuapp.com/jira_to_intercom`, where YOUR_APP_USERNAME is the value of the `APP_USERNAME` var, and YOUR_APP_PASSWORD is the value of the `APP_PASSWORD` var
-

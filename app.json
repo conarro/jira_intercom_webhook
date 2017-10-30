@@ -18,10 +18,6 @@
       "description": "Password used for basic auth",
       "generator": "secret"
     },
-    "INTERCOM_APP_ID": {
-      "description": "ID of your application in Intercom",
-      "value": "intercom_app_id"
-    },
     "INTERCOM_API_KEY": {
       "description": "API key for your Intercom account",
       "value": "intercom_api_key"
